@@ -42,18 +42,35 @@ void setup() {
   legLeft.begin();     legLeft.setBrightness(BRIGHTNESS);     legLeft.show();
 }
 
+
+#define pulseWhite_wait 1000//じわじわの光までの時間
+#define pulseWhite_space 1000 //じわじわ光の間隔
+#define random_all_wait 1000//ランダム点灯までの時間
+#define colorWipeRange_wave_foot_wait 1000//下⇒上点灯までの時間
+#define colorWipeRange_wave_time 50//下⇒上点灯の点灯間隔時間
+
 void loop() {
-  // じわじわ光る
-  pulseWhite_series_sune(1, 5, 1);
-  delay(1000);
-  pulseWhite_series_momo(1, 5, 1);
-  delay(1000);
-  pulseWhite_series_body(1, 5, 1);
-  delay(1000);
-  pulseWhiteAll(1, 5, 2); //(time,wait,speed)
-  delay(2000);
-  // ランダム点灯
-  random_all(armLeft.Color(0, 0, 0, 255), 25, 500,5);
+  // 1. 全身に単色
+
+  delay(pulseWhite_wait);
+//////////////////じわじわ光る
+ pulseWhite_series_sune(1, 5, 1);
+  delay(pulseWhite_space);
+ pulseWhite_series_momo(1, 5, 1);
+   delay(pulseWhite_space);
+ pulseWhite_series_body(1, 5, 1);
+   delay(pulseWhite_space);
+ pulseWhite_arm(1, 5, 1); //(time,wait,speed)
+   delay(pulseWhite_space);
+///////////////////////////////
+   delay(random_all_wait);
+//////////////////ランダム点灯
+  random_all(armLeft.Color(0, 0, 0, 255), 25, 500,5); //左アーム　ランダム点灯 ,関数(色、点灯回数、待ち時間、点灯個数)
+//////////////////////////////
+   delay(colorWipeRange_wave_foot_wait);
+//////////////////下⇒上の点灯
+colorWipeRange_wave_foot(armLeft.Color(0, 0, 0, 255), colorWipeRange_wave_time); // 白  
+colorWipeRange_wave_bodyarm(armLeft.Color(0, 0, 0, 255), colorWipeRange_wave_time); // 白
 //////////////////////////////
 
   delay(1000);
@@ -82,8 +99,7 @@ void setAllColor(uint32_t color) {
   }
 }
 
-// アーム左
-void setarmLeftColor(uint32_t color) {
+void setarmLeftColor(uint32_t color) {//アーム左
   Adafruit_NeoPixel* strips[] = { &armLeft };
   for (auto strip : strips) {
     for (uint16_t i = 0; i < strip->numPixels(); i++) {
@@ -93,7 +109,7 @@ void setarmLeftColor(uint32_t color) {
   }
 }
 
-void setbodyLeftColor(uint32_t color) { //ボディー左
+void setbodyLeftColor(uint32_t color) {//ボディー左
   Adafruit_NeoPixel* strips[] = { &bodyLeft };
   for (auto strip : strips) {
     for (uint16_t i = 0; i < strip->numPixels(); i++) {
@@ -103,7 +119,7 @@ void setbodyLeftColor(uint32_t color) { //ボディー左
   }
 }
 
-void setbodyRightColor(uint32_t color) { //ボディー右
+void setbodyRightColor(uint32_t color) {//ボディー右
   Adafruit_NeoPixel* strips[] = { &bodyRight };
   for (auto strip : strips) {
     for (uint16_t i = 0; i < strip->numPixels(); i++) {
@@ -113,7 +129,7 @@ void setbodyRightColor(uint32_t color) { //ボディー右
   }
 }
 
-void setarmRightColor(uint32_t color) { //アーム　右
+void setarmRightColor(uint32_t color) {//アーム　右
   Adafruit_NeoPixel* strips[] = { &armRight };
   for (auto strip : strips) {
     for (uint16_t i = 0; i < strip->numPixels(); i++) {
@@ -126,17 +142,17 @@ void setarmRightColor(uint32_t color) { //アーム　右
 void setlegRightColor(uint32_t color) {//モモ　右
   Adafruit_NeoPixel* strips[] = { &legRight };
   for (auto strip : strips) {
-    for (uint16_t i = 0; i < strip->numPixels(); i++) {
+    for (uint16_t i = 0; i < strip->numPixels()-10; i++) {
       strip->setPixelColor(i, color);
     }
     strip->show();
   }
 }
 
-void setlegLeftColor(uint32_t color) {// モモ　左
+void setlegLeftColor(uint32_t color) {//モモ　左
   Adafruit_NeoPixel* strips[] = { &legLeft };
   for (auto strip : strips) {
-    for (uint16_t i = 0; i < strip->numPixels(); i++) {
+    for (uint16_t i = 0; i < strip->numPixels()-10; i++) {
       strip->setPixelColor(i, color);
     }
     strip->show();
@@ -199,7 +215,7 @@ void pulseWhite_series_sune(uint16_t time, uint8_t wait, uint8_t speed) {
   }
 }
 
-// 太もも光る
+//太もも光る
 void pulseWhite_series_momo(uint16_t time, uint8_t wait, uint8_t speed) {
   for (uint16_t k = 0; k < time; k++) {
     for (int j = 0; j < 256; j += speed) { 
@@ -219,23 +235,47 @@ void pulseWhite_series_momo(uint16_t time, uint8_t wait, uint8_t speed) {
   }
 }
 
-// 腰光る
+//腰　光る
 void pulseWhite_series_body(uint16_t time, uint8_t wait, uint8_t speed) {
   for (uint16_t k = 0; k < time; k++) {
     for (int j = 0; j < 256; j += speed) { 
       uint8_t val = neopix_gamma[j];
       setbodyLeftColor(armLeft.Color(0, 0, 0, val));
       setbodyRightColor(armLeft.Color(0, 0, 0, val));
-      setlegRightColor(armLeft.Color(0, 0, 0, val));
-      setlegLeftColor(armLeft.Color(0, 0, 0, val));
+     // setlegRightColor(armLeft.Color(0, 0, 0, val));
+     // setlegLeftColor(armLeft.Color(0, 0, 0, val));
       delay(wait);
     }
     for (int j = 255; j >= 0; j -= 4) {
       uint8_t val = neopix_gamma[j];
       setbodyLeftColor(armLeft.Color(0, 0, 0, val));
       setbodyRightColor(armLeft.Color(0, 0, 0, val));
-      setlegRightColor(armLeft.Color(0, 0, 0, val));
-      setlegLeftColor(armLeft.Color(0, 0, 0, val));
+    //  setlegRightColor(armLeft.Color(0, 0, 0, val));
+    //  setlegLeftColor(armLeft.Color(0, 0, 0, val));
+      delay(wait);
+    }
+  
+    delay(100);
+  }
+}
+
+//アーム　光る
+void  pulseWhite_arm(uint16_t time, uint8_t wait, uint8_t speed) {
+  for (uint16_t k = 0; k < time; k++) {
+    for (int j = 0; j < 256; j += speed) { 
+      uint8_t val = neopix_gamma[j];
+     setarmRightColor(armLeft.Color(0, 0, 0, val));
+     setarmLeftColor(armLeft.Color(0, 0, 0, val));
+     // setlegRightColor(armLeft.Color(0, 0, 0, val));
+     // setlegLeftColor(armLeft.Color(0, 0, 0, val));
+      delay(wait);
+    }
+    for (int j = 255; j >= 0; j -= 4) {
+      uint8_t val = neopix_gamma[j];
+     setarmRightColor(armLeft.Color(0, 0, 0, val));
+     setarmLeftColor(armLeft.Color(0, 0, 0, val));
+    //  setlegRightColor(armLeft.Color(0, 0, 0, val));
+    //  setlegLeftColor(armLeft.Color(0, 0, 0, val));
       delay(wait);
     }
   
@@ -276,14 +316,13 @@ uint32_t Wheel(byte WheelPos) {
   return armLeft.Color(WheelPos * 3, 255 - WheelPos * 3, 0, 0);
 }
 
-// ランダム点灯
-void  random_all(uint32_t c, uint16_t time, uint8_t wait,uint8_t num) {
-  Adafruit_NeoPixel* strips1[] = { &armLeft};
-  Adafruit_NeoPixel* strips2[] = { &bodyLeft};
-  Adafruit_NeoPixel* strips3[] = { &bodyRight};
-  Adafruit_NeoPixel* strips4[] = { &armRight};
-  Adafruit_NeoPixel* strips5[] = { &legRight};
-  Adafruit_NeoPixel* strips6[] = { &legLeft};
+void  random_all(uint32_t c, uint16_t time, uint8_t wait,uint8_t num) { /////ランダム点灯
+ Adafruit_NeoPixel* strips1[] = { &armLeft};
+ Adafruit_NeoPixel* strips2[] = { &bodyLeft};
+ Adafruit_NeoPixel* strips3[] = { &bodyRight};
+ Adafruit_NeoPixel* strips4[] = { &armRight};
+ Adafruit_NeoPixel* strips5[] = { &legRight};
+ Adafruit_NeoPixel* strips6[] = { &legLeft};    
   uint32_t ledPosition_armLeft_LED;
   uint32_t ledPosition_bodyLeft_LED;
   uint32_t ledPosition_bodyRight_LED;
@@ -291,76 +330,132 @@ void  random_all(uint32_t c, uint16_t time, uint8_t wait,uint8_t num) {
   uint32_t ledPosition_legRight_LED;
   uint32_t ledPosition_legLeft_LED;
   for (auto strip1 : strips1) {
-    for (auto strip2 : strips2) {
-      for (auto strip3 : strips3) {
-        for (auto strip4 : strips4) {
-          for (auto strip5 : strips5) {
-            for (auto strip6 : strips6) {
-              for(uint16_t i=0; i<=time; i++){
-                ledPosition_armLeft_LED = random(0, armLeft_LED);
-                ledPosition_bodyLeft_LED=random(0, bodyLeft_LED);
-                ledPosition_bodyRight_LED=random(0, bodyRight_LED);
-                ledPosition_armRight_LED=random(0, armRight_LED);
-                ledPosition_legRight_LED=random(0, legRight_LED);
-                ledPosition_legLeft_LED=random(0, legLeft_LED);
+      for (auto strip2 : strips2) {
+          for (auto strip3 : strips3) {
+            for (auto strip4 : strips4) {
+              for (auto strip5 : strips5) {
+                for (auto strip6 : strips6) {
+                  for(uint16_t i=0; i<=time; i++){
+                   ledPosition_armLeft_LED = random(0, armLeft_LED);
+                   ledPosition_bodyLeft_LED=random(0, bodyLeft_LED);
+                   ledPosition_bodyRight_LED=random(0, bodyRight_LED);
+                   ledPosition_armRight_LED=random(0, armRight_LED);
+                   ledPosition_legRight_LED=random(0, legRight_LED);
+                   ledPosition_legLeft_LED=random(0, legLeft_LED);
     
-                for(uint16_t i=ledPosition_armLeft_LED; i<ledPosition_armLeft_LED + num; i++) {
-                  strip1->setPixelColor(i, c);
-                }
-                for(uint16_t i=ledPosition_bodyLeft_LED; i<ledPosition_bodyLeft_LED + num; i++) {
-                  strip2->setPixelColor(i, c);
-                }
-                for(uint16_t i=ledPosition_bodyRight_LED; i<ledPosition_bodyRight_LED + num; i++) {
-                  strip3->setPixelColor(i, c);
-                }
-                for(uint16_t i=ledPosition_armRight_LED; i<ledPosition_armRight_LED + num; i++) {
-                  strip4->setPixelColor(i, c);
-                }
-                for(uint16_t i=ledPosition_legRight_LED; i<ledPosition_legRight_LED + num; i++) {
-                 strip5->setPixelColor(i, c);
-                }
-                for(uint16_t i=ledPosition_legLeft_LED; i<ledPosition_legLeft_LED + num; i++) {
-                 strip6->setPixelColor(i, c);
-                }
+                     for(uint16_t i=ledPosition_armLeft_LED; i<ledPosition_armLeft_LED + num; i++) {
+                         strip1->setPixelColor(i, c);
+                     }
+                     for(uint16_t i= ledPosition_bodyLeft_LED; i< ledPosition_bodyLeft_LED + num; i++) {
+                         strip2->setPixelColor(i, c);
+                     }
+                     for(uint16_t i=  ledPosition_bodyRight_LED; i<  ledPosition_bodyRight_LED + num; i++) {
+                         strip3->setPixelColor(i, c);
+                     }
+                     for(uint16_t i=  ledPosition_armRight_LED; i<  ledPosition_armRight_LED + num; i++) {
+                         strip4->setPixelColor(i, c);
+                     }
+                     for(uint16_t i=  ledPosition_legRight_LED; i<   ledPosition_legRight_LED + num; i++) {
+                        strip5->setPixelColor(i, c);
+                     }
+                     for(uint16_t i=   ledPosition_legLeft_LED; i<  ledPosition_legLeft_LED + num; i++) {
+                        strip6->setPixelColor(i, c);
+                     }
         
-                strip1->show();
-                strip2->show();
-                strip3->show();
-                strip4->show();
+                     strip1->show();
+                     strip2->show();
+                     strip3->show();
+                     strip4->show();
+                     strip5->show();
+                     strip6->show();
+                     delay(wait);
+         
+                     for(uint16_t i=ledPosition_armLeft_LED; i<ledPosition_armLeft_LED + num; i++) {
+                        strip1->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
+                     }
+                    for(uint16_t i= ledPosition_bodyLeft_LED; i< ledPosition_bodyLeft_LED + num; i++) {
+                        strip2->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
+                    }
+                    for(uint16_t i= ledPosition_bodyRight_LED; i< ledPosition_bodyRight_LED + num; i++) {
+                        strip3->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
+                    }
+                   for(uint16_t i=ledPosition_armRight_LED; i< ledPosition_armRight_LED + num; i++) {
+                       strip4->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
+                    }
+                  for(uint16_t i= ledPosition_legRight_LED; i<  ledPosition_legRight_LED + num; i++) {
+                       strip5->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
+                    }
+                 for(uint16_t i=  ledPosition_legLeft_LED; i<   ledPosition_legLeft_LED + num; i++) {
+                       strip6->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
+                    }
+        
+                  strip1->show();
+                  strip2->show();
+                  strip3->show();
+                  strip4->show();
+                  strip5->show();
+                  strip6->show();
+  }
+}
+}
+}
+}
+}
+}
+}
+
+void colorWipeRange_wave_foot(uint32_t c, uint32_t wait) {  //足部分の下⇒上の点灯
+ Adafruit_NeoPixel* strips5[] = { &legRight};
+ Adafruit_NeoPixel* strips6[] = { &legLeft};  
+   for (auto strip5 : strips5) {
+       for (auto strip6 : strips6) {
+          for(uint16_t i=legRight_LED; i>0; i--) { //legRight_LED=legleft_LEDのため、legRight_LEDを使用
+                strip5->setPixelColor(i, c);
+                strip6->setPixelColor(i, c);   
                 strip5->show();
                 strip6->show();
                 delay(wait);
-         
-                for(uint16_t i=ledPosition_armLeft_LED; i<ledPosition_armLeft_LED + num; i++) {
-                  strip1->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
-                }
-                for(uint16_t i= ledPosition_bodyLeft_LED; i< ledPosition_bodyLeft_LED + num; i++) {
-                  strip2->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
-                }
-                for(uint16_t i= ledPosition_bodyRight_LED; i< ledPosition_bodyRight_LED + num; i++) {
-                  strip3->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
-                }
-                for(uint16_t i=ledPosition_armRight_LED; i< ledPosition_armRight_LED + num; i++) {
-                  strip4->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
-                }
-                for(uint16_t i= ledPosition_legRight_LED; i<  ledPosition_legRight_LED + num; i++) {
-                  strip5->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
-                }
-                for(uint16_t i=  ledPosition_legLeft_LED; i<   ledPosition_legLeft_LED + num; i++) {
-                  strip6->setPixelColor(i, armLeft.Color(0, 0, 0, 0));
-                }
-        
-                strip1->show();
+               }
+
+          }
+}
+}
+
+void colorWipeRange_wave_bodyarm(uint32_t c, uint32_t wait) {  //上半身部分の下⇒上の点灯
+ Adafruit_NeoPixel* strips1[] = { &armLeft};
+ Adafruit_NeoPixel* strips2[] = { &bodyLeft};
+ Adafruit_NeoPixel* strips3[] = { &bodyRight};
+ Adafruit_NeoPixel* strips4[] = { &armRight};
+ uint32_t g=(armLeft_LED/2);
+  for (auto strip1 : strips1) {
+   for (auto strip2 : strips2) {
+       for (auto strip3 : strips3) {
+         for (auto strip4 : strips4) {        
+          for(uint16_t i=armLeft_LED; i>0; i--) { //armLeft_LED=bodyRigh_LED　かつarmLeft＿LEDが一番個数が多いためarmLeft_LEDを使用
+              
+                strip2->setPixelColor(i, c);
+                strip3->setPixelColor(i, c);   
                 strip2->show();
                 strip3->show();
+
+                if (i>=(armLeft_LED/2)){
+                strip1->setPixelColor(i-(armLeft_LED/2+1), c);
+                strip4->setPixelColor(i-(armLeft_LED/2+1), c);   
+                strip1->show();               
+                strip4->show();   
+
+                strip1->setPixelColor(g, c);
+                strip4->setPixelColor(g, c);   
+                strip1->show();               
                 strip4->show();
-                strip5->show();
-                strip6->show();
-              }
-            }
+                g=g+1;;        
+                delay(wait);
+               }
+               
+
           }
-        }
-      }
-    }
-  }
+ }
+}
+}
+}
 }
