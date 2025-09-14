@@ -37,7 +37,7 @@
 
 // ==================== タイミング設定 ====================
 // じわじわ光る（消える）
-#define PULSE_WHITE_WAIT      5500  // 開始待ち時間
+#define PULSE_WHITE_WAIT      7500  // 開始待ち時間
 #define PULSE_WHITE_WAIT2     1500  // 部位間待ち時間
 #define PULSE_WHITE_TIME      1     // 点滅回数
 #define PULSE_WHITE_SPACE     5     // 点滅間隔
